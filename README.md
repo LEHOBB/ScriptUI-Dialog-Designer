@@ -4,7 +4,7 @@ Design your ScriptUI dialogs and export a ready-to-use `.jsx` for Photoshop, Ill
 
 *Inspired by [ScriptUI Dialog Builder](https://scriptui.joonas.me/) by Joonas Pääkkö.*
 
-Use it online: https://lehobb.github.io/ScriptUI-Dialog-Designer/**
+Use it online: https://lehobb.github.io/ScriptUI-Dialog-Designer/
 
 ## Usage
 
