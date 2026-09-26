@@ -8,13 +8,15 @@ Design your ScriptUI dialogs and export a ready-to-use `.jsx` for Photoshop, Ill
 
 ## Usage
 
-Open the [online version](https://lehobb.github.io/ScriptUI-Dialog-Designer/), or download `index.html` and open it in a browser — it is a single self-contained file that works offline, with no installation or dependencies.
-
 1. Pick the **target application** (top bar).
 2. Build the dialog from the controls palette (click or drag & drop), then tune each element in the inspector.
 3. **Download .jsx** and run it from the application.
 
 The exported `.jsx` embeds the layout, so it can be reopened later with **Open ⇧**.
+
+## Offline use
+
+This repository includes a `build` folder that contains the same files as the website. So if the URL doesn't work for some reason, you should be able to download the repo and use it locally (offline). Everything it needs to run is in the `build` folder — no installation, no dependencies. Just open `build/index.html` in your browser.
 
 ## Features
 
