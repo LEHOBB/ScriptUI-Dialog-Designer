@@ -326,4 +326,19 @@ body{margin:0;background:var(--bg);color:var(--txt);
   .cols{flex-direction:column}
   .left,.right{width:100%;border:0;border-bottom:1px solid var(--line)}
   .tree{max-height:180px}
+  /* l'aperçu n'a plus de hauteur « restante » à occuper : on lui en donne une, et on le place en premier */
+  .center{order:-1;flex:none;height:60vh;min-height:360px;border-bottom:1px solid var(--line)}
+  .center:not(.canvasmode){height:auto;min-height:0;max-height:70vh}
+  .right{overflow:visible}
+}
+/* écrans tactiles : un doigt déplace l'aperçu, deux doigts zooment (la page ne défile pas pendant ce geste) */
+@media (pointer: coarse){
+  .center.canvasmode{touch-action:none}
+}
+@media (max-width: 600px){
+  .stage-note{display:none}                 /* texte d'aide : trop encombrant sur téléphone */
+  .pv-toolbar{top:8px;gap:6px}
+  .pan-hint{display:none}
+  .topbar{padding:8px 10px}
+  .brand-sub{display:none}
 }

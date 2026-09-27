@@ -4,7 +4,7 @@
    Générateur d'interfaces ExtendScript pour les applications Adobe
    (Photoshop, Illustrator, InDesign, After Effects, Bridge).
    ============================================================ */
-var APP_VERSION = "5.9.14";
+var APP_VERSION = "5.9.15";
 
 /* ---------- applications cibles ----------
    target : valeur de la directive #target (null = aucune)
@@ -1868,6 +1868,48 @@ function attachCanvasNav(center,canvas){
     e.preventDefault();
     setZoom(S.zoom*(e.deltaY<0?1.12:1/1.12),e.clientX,e.clientY);
   },{passive:false});
+
+  /* Tactile : un doigt déplace l'aperçu (au-delà de 6 px, pour qu'un simple toucher sélectionne encore),
+     deux doigts zooment autour de leur milieu. */
+  var touches={}, tPan=null, pinch=null, TAP_SLOP=6;
+  function pts(){ return Object.keys(touches).map(function(k){ return touches[k]; }); }
+  center.addEventListener("pointerdown",function(e){
+    if(e.pointerType!=="touch") return;
+    touches[e.pointerId]={x:e.clientX,y:e.clientY};
+    var p=pts();
+    if(p.length===1){ tPan={sx:e.clientX,sy:e.clientY,px:S.pan.x,py:S.pan.y,moved:false}; pinch=null; }
+    else if(p.length===2){
+      tPan=null;
+      pinch={d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1, z:S.zoom};
+      canvas.classList.add("panning-layer");
+    }
+  });
+  center.addEventListener("pointermove",function(e){
+    if(e.pointerType!=="touch"||!touches[e.pointerId]) return;
+    touches[e.pointerId]={x:e.clientX,y:e.clientY};
+    var p=pts();
+    if(pinch && p.length>=2){
+      var d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1;
+      setZoom(pinch.z*d/pinch.d,(p[0].x+p[1].x)/2,(p[0].y+p[1].y)/2);
+    } else if(tPan){
+      var dx=e.clientX-tPan.sx, dy=e.clientY-tPan.sy;
+      if(!tPan.moved && Math.hypot(dx,dy)<TAP_SLOP) return;
+      if(!tPan.moved){ tPan.moved=true; canvas.classList.add("panning-layer"); }
+      S.pan.x=tPan.px+dx; S.pan.y=tPan.py+dy; applyTransform();
+    }
+  });
+  function touchEnd(e){
+    if(e.pointerType!=="touch") return;
+    var wasMoved=tPan&&tPan.moved;
+    delete touches[e.pointerId];
+    if(pts().length<2) pinch=null;
+    if(!pts().length){ tPan=null; canvas.classList.remove("panning-layer"); }
+    // un glissement ne doit pas se terminer par un « clic » qui changerait la sélection
+    if(wasMoved){ var block=function(ev){ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener("click",block,true); };
+      window.addEventListener("click",block,true); setTimeout(function(){ window.removeEventListener("click",block,true); },350); }
+  }
+  center.addEventListener("pointerup",touchEnd);
+  center.addEventListener("pointercancel",touchEnd);
 }
 
 /* ============================================================
@@ -2873,7 +2915,9 @@ function render(keepInspector){
           onclick:function(e){e.stopPropagation();resetView();}}),
         h("button",{text:"+",title:"Zoomer",onclick:function(e){e.stopPropagation();setZoom(S.zoom*1.15);}}),
         h("button",{text:"⛶",title:"Recadrer",onclick:function(e){e.stopPropagation();resetView();}})),
-      h("div",{class:"pan-hint",text:"Molette enfoncée (ou Espace + clic) pour déplacer · molette pour zoomer"}));
+      h("div",{class:"pan-hint",text: (window.matchMedia&&matchMedia("(pointer: coarse)").matches)
+        ? "Un doigt pour déplacer · deux doigts pour zoomer"
+        : "Molette enfoncée (ou Espace + clic) pour déplacer · molette pour zoomer"}));
     var win=h("div",{class:"ae-window"+(!test&&S.selId==="root"?" sel":""),
       onclick:function(e){ e.stopPropagation(); if(!test&&S.selId!=="root"&&!e.ctrlKey&&!e.metaKey){ S.selId="root"; render(); } }},
       rp.borderless&&rp.winType!=="dockable" ? null : h("div",{class:"ae-titlebar"},
