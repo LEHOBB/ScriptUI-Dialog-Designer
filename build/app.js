@@ -4,7 +4,7 @@
    Générateur d'interfaces ExtendScript pour les applications Adobe
    (Photoshop, Illustrator, InDesign, After Effects, Bridge).
    ============================================================ */
-var APP_VERSION = "5.9.13";
+var APP_VERSION = "5.9.14";
 
 /* ---------- applications cibles ----------
    target : valeur de la directive #target (null = aucune)
